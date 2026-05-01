@@ -1,0 +1,18 @@
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+
+# Görsel işleme
+Pillow>=10.3.0
+numpy>=1.26.4
+
+# ML (ileride kullanılacak)
+torch>=2.3.0
+torchvision>=0.18.0
+
+# Veritabanı (ileride kullanılacak)
+sqlalchemy>=2.0.30
+alembic>=1.13.1
+
+# CrewAI (ajan orkestrasyon — isteğe bağlı)
+crewai>=0.28.0
