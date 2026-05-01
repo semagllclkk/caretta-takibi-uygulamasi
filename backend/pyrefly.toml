@@ -1,0 +1,9 @@
+# backend/pyrefly.toml
+# Bu dosya pyrefly'a backend/ klasorunu import koku olarak tanimlatir.
+# agents.*, services.*, ml_engine.* gibi importlar buradan cozumlenir.
+[pyrefly]
+project_includes = ["."]
+project_excludes = ["venv", "ml_engine/checkpoints", "**/__pycache__", "**/*.pyc"]
+analyze_docstring_examples = false
+strict = false
+python_version = "3.13"

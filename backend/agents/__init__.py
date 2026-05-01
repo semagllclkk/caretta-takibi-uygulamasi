@@ -6,6 +6,16 @@ from agents.data_sources import (
     MockDuckDuckGoImageSource,
     MockKaggleDatasetSource,
 )
+from agents.git_agent import (
+    AutoCommitSummary,
+    CommitGroup,
+    CommitResult,
+    CommitType,
+    ConventionalCommitClassifier,
+    GitCommitAgent,
+    GitShellTool,
+    NothingToCommitError,
+)
 from agents.researcher import (
     CollectionReport,
     QualityMetrics,
@@ -26,6 +36,15 @@ __all__ = [
     "MockBingImageSource",
     "MockDuckDuckGoImageSource",
     "MockKaggleDatasetSource",
+    # git_agent
+    "AutoCommitSummary",
+    "CommitGroup",
+    "CommitResult",
+    "CommitType",
+    "ConventionalCommitClassifier",
+    "GitCommitAgent",
+    "GitShellTool",
+    "NothingToCommitError",
     # researcher
     "CollectionReport",
     "QualityMetrics",

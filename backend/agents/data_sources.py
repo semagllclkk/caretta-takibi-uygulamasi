@@ -1,5 +1,7 @@
 """
 agents/data_sources.py
+
+Not: LocalDirectorySource alt-klasor yapısını (t001/, t002/, ...) destekler.
 -----------------------
 Veri Kaynağı Arayüzü ve Implementasyonları
 
@@ -237,4 +239,71 @@ class MockKaggleDatasetSource(IDataSource):
             ))
 
         logger.info("[KaggleMock] %d kayıt döndürüldü.", len(records))
+        return records
+
+class LocalDirectorySource(IDataSource):
+    """
+    Yerel klasorden fotograflari okuyan veri kaynagi.
+
+    Alt-klasor yapisi (t001/, t002/, ...) desteklenir:
+    Her alt-klasor bir kaplumbaga bireyi (sinif etiketi) olarak yorumlanir.
+    Gorsel boyutlari PIL uzerinden gercek degerlerle okunur.
+    """
+
+    _VALID_EXT: frozenset[str] = frozenset({".jpg", ".jpeg", ".png", ".webp"})
+
+    def __init__(self, directory_path: str = "data/images") -> None:
+        from pathlib import Path
+        self.directory_path = Path(directory_path)
+
+    @property
+    def source_name(self) -> str:
+        return "local_directory"
+
+    def search(self, query: str = "", max_results: int = 5000) -> list[DataRecord]:
+        from pathlib import Path
+        logger.info("[LocalSource] '%s' dizini taraniyor...", self.directory_path)
+
+        if not self.directory_path.exists():
+            logger.warning("[LocalSource] Dizin bulunamadi: %s", self.directory_path)
+            return []
+
+        records: list[DataRecord] = []
+        # rglob ile derin tarama — t001/img.jpg, t002/img.jpg, ...
+        for file_path in self.directory_path.rglob("*"):
+            if len(records) >= max_results:
+                break
+            if file_path.suffix.lower() not in self._VALID_EXT:
+                continue
+            if not file_path.is_file():
+                continue
+
+            # turtle_id = dogrudan ust klasor adi (t001, t002, ...)
+            turtle_id = file_path.parent.name
+
+            # Gercek cozunurluk
+            width, height = 0, 0
+            try:
+                from PIL import Image as _PIL
+                with _PIL.open(file_path) as img:
+                    width, height = img.size
+            except Exception:
+                pass
+
+            records.append(DataRecord(
+                url=str(file_path.absolute()),
+                source=self.source_name,
+                query=query or "local_dataset",
+                title=file_path.name,
+                width=width,
+                height=height,
+                file_format=file_path.suffix.lower().lstrip("."),
+                license="local",
+                extra={
+                    "turtle_id": turtle_id,
+                    "file_size_bytes": file_path.stat().st_size,
+                },
+            ))
+
+        logger.info("[LocalSource] %d gercek fotograf bulundu.", len(records))
         return records

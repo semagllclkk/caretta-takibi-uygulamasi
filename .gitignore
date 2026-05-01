@@ -1,0 +1,21 @@
+# venv
+venv/
+.venv/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+.env.local
+
+# Data / Cache
+data/
+cache/
+*.db
+
+# IDEs
+.idea/
+*.swp
+*~

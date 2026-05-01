@@ -1,0 +1,17 @@
+# pyrefly.toml  — import root'u backend/ olarak zorla
+[pyrefly]
+project_includes = ["backend"]
+project_excludes = [
+    "backend/venv",
+    "backend/ml_engine/checkpoints",
+    "**/__pycache__",
+    "**/*.pyc",
+]
+
+# Backend dizini hem kaynak koku hem de Python calizma dizini
+# Bu ayar agents.*, services.*, ml_engine.* gibi importlari cozumler.
+search_path = ["backend"]
+
+analyze_docstring_examples = false
+strict = false
+python_version = "3.13"
