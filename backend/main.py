@@ -47,7 +47,17 @@ app.add_middleware(
 # API Router (SOLID: Presentation Layer)
 # ---------------------------------------------------------------------------
 from api.endpoints import router as api_router
+
 app.include_router(api_router)
+
+# ---------------------------------------------------------------------------
+# Health Check
+# ---------------------------------------------------------------------------
+
+@app.get("/api/health", tags=["Health"])
+async def health_check():
+    """API'nin sağlık kontrolü."""
+    return {"status": "ok", "message": "API is running"}
 
 # ---------------------------------------------------------------------------
 # Lazy singletons — ilk istekte başlatılır (torch yükleme süresi için)
