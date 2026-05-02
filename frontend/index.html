@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caretta Track - Kaplumbağa Yüz Tanıma Sistemi</title>
+    <title>Caretta Track - Kaplumbağa Yüz Tanıma</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- Header / Başlık -->
     <header class="header">
         <div class="header-content">
-            <div class="logo">
-                🐢 Caretta Track
-            </div>
-            <p class="tagline">Deniz Kaplumbağası Yüz Tanıma Sistemi</p>
+            <div class="logo">🐢 Caretta Track</div>
+            <p class="tagline">Deniz Kaplumbağası Tanıma Sistemi</p>
         </div>
         <div class="header-status">
             <span id="apiStatus" class="status-badge offline">API Durumu</span>
@@ -22,142 +20,78 @@
 
     <!-- Ana İçerik -->
     <main class="container">
-        <div class="content-grid">
-            <!-- Kart 1: Sistemi Eğit -->
-            <section class="card training-card">
-                <div class="card-header">
-                    <h2>📚 Sistemi Eğit</h2>
-                    <p class="card-subtitle">Modeli yerel veri setiyle eğitin</p>
+        <!-- Kaplumbağa Tanı (Prediction Card) -->
+        <section class="card prediction-card">
+            <div class="card-header">
+                <h2>🔍 Kaplumbağa Tanı</h2>
+                <p class="card-subtitle">Fotoğraftan kimlik belirleyin</p>
+            </div>
+
+            <div class="card-body">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📸</div>
+                    <p class="upload-text">Kaplumbağa fotoğrafını buraya sürükleyin</p>
+                    <p class="upload-hint">veya</p>
+                    <label for="imageInput" class="upload-label">
+                        <button type="button" class="btn btn-secondary">Dosya Seç</button>
+                    </label>
+                    <input 
+                        type="file" 
+                        id="imageInput" 
+                        name="image"
+                        accept="image/*"
+                        hidden
+                    >
+                    <p class="upload-formats">JPG, PNG, WebP desteklenir</p>
                 </div>
 
-                <div class="card-body">
-                    <div class="info-box">
-                        <p>Yerel veri seti üzerinde ResNet-18 modelini fine-tune eder. Eğitim süresi veri boyutuna bağlıdır.</p>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="trainingMaxResults">Maksimum Kayıt Sayısı:</label>
-                        <div class="input-wrapper">
-                            <input 
-                                type="number" 
-                                id="trainingMaxResults" 
-                                name="maxResults"
-                                value="5000" 
-                                min="100" 
-                                max="50000"
-                                step="100"
-                            >
-                            <span class="input-hint">100 - 50000</span>
-                        </div>
-                    </div>
-
-                    <button id="trainBtn" class="btn btn-primary btn-large">
-                        <span class="btn-text">Eğitimi Başlat</span>
-                    </button>
-
-                    <!-- Sonuçlar Alanı -->
-                    <div id="trainingResults" class="results-area hidden">
-                        <div class="result-header">
-                            <h3>Eğitim Sonuçları</h3>
-                            <button class="btn-close" id="closeTrainingResults">✕</button>
-                        </div>
-                        <div id="trainingResultsContent" class="results-content">
-                            <!-- Dinamik içerik buraya yerleştirilecek -->
-                        </div>
-                    </div>
-
-                    <!-- Loading Animasyonu -->
-                    <div id="trainingLoading" class="loading hidden">
-                        <div class="spinner-ocean">
-                            <div class="wave wave-1"></div>
-                            <div class="wave wave-2"></div>
-                            <div class="wave wave-3"></div>
-                        </div>
-                        <p id="trainingLoadingText">Eğitim devam ediyor...</p>
-                    </div>
-
-                    <!-- Hata Mesajı -->
-                    <div id="trainingError" class="error-alert hidden">
-                        <span class="error-icon">⚠️</span>
-                        <div id="trainingErrorContent"></div>
-                        <button class="btn-close" id="closeTrainingError">✕</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Kart 2: Kaplumbağa Tanı -->
-            <section class="card prediction-card">
-                <div class="card-header">
-                    <h2>🔍 Kaplumbağa Tanı</h2>
-                    <p class="card-subtitle">Fotoğraftan kimlik belirleyin</p>
+                <!-- Seçilen Görsel Önizlemesi -->
+                <div id="imagePreview" class="image-preview hidden">
+                    <img id="previewImage" src="" alt="Önizleme">
+                    <p id="previewFileName"></p>
+                    <button id="changeImageBtn" class="btn btn-text">Resim Değiştir</button>
                 </div>
 
-                <div class="card-body">
-                    <div class="upload-area" id="uploadArea">
-                        <div class="upload-icon">📸</div>
-                        <p class="upload-text">Kaplumbağa fotoğrafını buraya sürükleyin</p>
-                        <p class="upload-hint">veya</p>
-                        <label for="imageInput" class="upload-label">
-                            <button type="button" class="btn btn-secondary">Dosya Seç</button>
-                        </label>
-                        <input 
-                            type="file" 
-                            id="imageInput" 
-                            name="image"
-                            accept="image/*"
-                            hidden
-                        >
-                        <p class="upload-formats">JPG, PNG, WebP desteklenir</p>
+                <!-- Tahmin Butonu -->
+                <button id="predictBtn" class="btn btn-primary btn-large hidden">
+                    <span class="btn-text">Tahmin Et</span>
+                </button>
+
+                <!-- Loading Animasyonu -->
+                <div id="predictionLoading" class="loading hidden">
+                    <div class="spinner-ocean">
+                        <div class="wave wave-1"></div>
+                        <div class="wave wave-2"></div>
+                        <div class="wave wave-3"></div>
                     </div>
+                    <p id="predictionLoadingText">Analiz ediliyor...</p>
+                </div>
 
-                    <!-- Seçilen Görsel Önizlemesi -->
-                    <div id="imagePreview" class="image-preview hidden">
-                        <img id="previewImage" src="" alt="Önizleme">
-                        <p id="previewFileName"></p>
-                        <button id="changeImageBtn" class="btn btn-text">Resim Değiştir</button>
+                <!-- Tahmin Sonucu -->
+                <div id="predictionResults" class="results-area hidden">
+                    <div class="result-header">
+                        <h3>Tahmin Sonucu</h3>
+                        <button class="btn-close" id="closePredictionResults">✕</button>
                     </div>
-
-                    <!-- Tahmin Butonu -->
-                    <button id="predictBtn" class="btn btn-primary btn-large hidden">
-                        <span class="btn-text">Tahmin Et</span>
-                    </button>
-
-                    <!-- Loading Animasyonu -->
-                    <div id="predictionLoading" class="loading hidden">
-                        <div class="spinner-ocean">
-                            <div class="wave wave-1"></div>
-                            <div class="wave wave-2"></div>
-                            <div class="wave wave-3"></div>
-                        </div>
-                        <p id="predictionLoadingText">Analiz ediliyor...</p>
-                    </div>
-
-                    <!-- Tahmin Sonucu -->
-                    <div id="predictionResults" class="results-area hidden">
-                        <div class="result-header">
-                            <h3>Tahmin Sonucu</h3>
-                            <button class="btn-close" id="closePredictionResults">✕</button>
-                        </div>
-                        <div id="predictionResultsContent" class="results-content">
-                            <!-- Dinamik içerik buraya yerleştirilecek -->
-                        </div>
-                    </div>
-
-                    <!-- Hata Mesajı -->
-                    <div id="predictionError" class="error-alert hidden">
-                        <span class="error-icon">⚠️</span>
-                        <div id="predictionErrorContent"></div>
-                        <button class="btn-close" id="closePredictionError">✕</button>
+                    <div id="predictionResultsContent" class="results-content">
+                        <!-- Dinamik içerik buraya yerleştirilecek -->
                     </div>
                 </div>
-            </section>
-        </div>
+
+                <!-- Hata Mesajı -->
+                <div id="predictionError" class="error-alert hidden">
+                    <span class="error-icon">⚠️</span>
+                    <div id="predictionErrorContent"></div>
+                    <button class="btn-close" id="closePredictionError">✕</button>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
     <footer class="footer">
         <p>&copy; 2026 Caretta Track. Deniz Kaplumbağası Koruma Projesi</p>
-        <p class="footer-api">API: <span id="apiUrl">http://127.0.0.1:8000</span></p>
+        <p class="footer-api">API: <span id="apiUrl">http://localhost:8000</span></p>
     </footer>
 
     <!-- JavaScript -->

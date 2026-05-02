@@ -171,22 +171,22 @@ p {
 .container {
     flex: 1;
     width: 100%;
-    max-width: 1400px;
+    max-width: 600px;
     margin: var(--spacing-xl) auto;
     padding: 0 var(--spacing-md);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
 }
 
 .content-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-    gap: var(--spacing-xl);
-    margin-bottom: var(--spacing-xl);
+    display: none;
 }
 
-@media (max-width: 1024px) {
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
+.prediction-card {
+    width: 100%;
+    max-width: 480px;
 }
 
 /* =========================================================================

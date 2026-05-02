@@ -1,11 +1,11 @@
 /**
- * Caretta Track - Frontend Application
+ * Caretta Track - Frontend Application (Prediction Only)
  * Vanilla JavaScript (ES6+) + Fetch API
  * 
- * SOLID Principles:
- *   - SRP: Her fonksiyon tek bir sorumluluğu var
- *   - DRY: Tekrarlayan kod minimize edildi
- *   - Clean Code: Açık, okunması kolay, well-documented
+ * Focus: Kaplumbağa Tanı (Prediction)
+ * - Dosya yükleme (drag-drop)
+ * - API tahmin isteği
+ * - Sonuç gösterimi
  */
 
 // =========================================================================
@@ -16,7 +16,6 @@ const CONFIG = {
     API_URL: 'http://localhost:8000',
     ENDPOINTS: {
         HEALTH: '/api/health',
-        TRAIN: '/api/train',
         PREDICT: '/api/predict',
     },
     TIMEOUT: 300000, // 5 dakika
@@ -28,9 +27,7 @@ const CONFIG = {
 // =========================================================================
 
 const state = {
-    isTraining: false,
     isPredicting: false,
-    selectedImage: null,
     selectedImageFile: null,
 };
 
@@ -73,41 +70,7 @@ async function updateApiStatus() {
 }
 
 /**
- * Modeli eğitim isteği gönderir
- * @param {number} maxResults - Maksimum kayıt sayısı
- * @returns {Promise<Object>} - Eğitim sonucu
- */
-async function trainModel(maxResults) {
-    try {
-        const requestBody = {
-            data_dir: null,
-            max_results: maxResults,
-        };
-
-        const response = await fetch(`${CONFIG.API_URL}${CONFIG.ENDPOINTS.TRAIN}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || `HTTP ${response.status}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Training error:', error);
-        throw error;
-    }
-}
-
-/**
- * Tahmin isteği gönderir (Fotoğraf + Metadata)
- * @param {File} imageFile - Yüklenen görsel dosyası
- * @returns {Promise<Object>} - Tahmin sonucu
+ * Tahmin isteği gönderir
  */
 async function predictTurtle(imageFile) {
     try {
@@ -117,7 +80,6 @@ async function predictTurtle(imageFile) {
         const response = await fetch(`${CONFIG.API_URL}${CONFIG.ENDPOINTS.PREDICT}`, {
             method: 'POST',
             body: formData,
-            // Content-Type otomatik olarak FormData için ayarlanır
         });
 
         if (!response.ok) {
@@ -139,34 +101,6 @@ async function predictTurtle(imageFile) {
 /**
  * Loading animasyonunu gösterir
  */
-function showTrainingLoading() {
-    const loading = document.getElementById('trainingLoading');
-    const results = document.getElementById('trainingResults');
-    const error = document.getElementById('trainingError');
-    const btn = document.getElementById('trainBtn');
-
-    loading.classList.remove('hidden');
-    results.classList.add('hidden');
-    error.classList.add('hidden');
-    btn.disabled = true;
-    state.isTraining = true;
-}
-
-/**
- * Loading animasyonunu gizler
- */
-function hideTrainingLoading() {
-    const loading = document.getElementById('trainingLoading');
-    const btn = document.getElementById('trainBtn');
-
-    loading.classList.add('hidden');
-    btn.disabled = false;
-    state.isTraining = false;
-}
-
-/**
- * Tahmin Loading animasyonunu gösterir
- */
 function showPredictionLoading() {
     const loading = document.getElementById('predictionLoading');
     const results = document.getElementById('predictionResults');
@@ -181,7 +115,7 @@ function showPredictionLoading() {
 }
 
 /**
- * Tahmin Loading animasyonunu gizler
+ * Loading animasyonunu gizler
  */
 function hidePredictionLoading() {
     const loading = document.getElementById('predictionLoading');
@@ -193,20 +127,7 @@ function hidePredictionLoading() {
 }
 
 /**
- * Eğitim hata mesajını gösterir
- */
-function showTrainingError(errorMessage) {
-    const errorDiv = document.getElementById('trainingError');
-    const errorContent = document.getElementById('trainingErrorContent');
-    const results = document.getElementById('trainingResults');
-
-    results.classList.add('hidden');
-    errorContent.textContent = errorMessage;
-    errorDiv.classList.remove('hidden');
-}
-
-/**
- * Tahmin hata mesajını gösterir
+ * Hata mesajını gösterir
  */
 function showPredictionError(errorMessage) {
     const errorDiv = document.getElementById('predictionError');
@@ -221,62 +142,6 @@ function showPredictionError(errorMessage) {
 // =========================================================================
 // Result Rendering
 // =========================================================================
-
-/**
- * Eğitim sonuçlarını ekranda gösterir
- */
-function displayTrainingResults(data) {
-    const resultsContent = document.getElementById('trainingResultsContent');
-    const results = document.getElementById('trainingResults');
-
-    let html = '';
-
-    // Toplanan ve kabul edilen kayıt sayıları
-    html += `
-        <div class="result-item">
-            <span class="result-label">📊 Toplam Kaydedilen Veri</span>
-            <span class="result-value">${data.records_collected}</span>
-        </div>
-    `;
-
-    html += `
-        <div class="result-item">
-            <span class="result-label">✓ Kabul Edilen Veri</span>
-            <span class="result-value">${data.records_accepted}</span>
-        </div>
-    `;
-
-    // Eğitim detayları
-    if (data.epochs_trained !== null) {
-        html += `
-            <div class="result-item">
-                <span class="result-label">📚 Eğitim Dönem Sayısı</span>
-                <span class="result-value">${data.epochs_trained}</span>
-            </div>
-        `;
-    }
-
-    if (data.final_loss !== null) {
-        html += `
-            <div class="result-item">
-                <span class="result-label">📉 Final Loss (Kaybı)</span>
-                <span class="result-value">${parseFloat(data.final_loss).toFixed(4)}</span>
-            </div>
-        `;
-    }
-
-    // Başarı mesajı
-    if (data.success) {
-        html += `
-            <div class="info-box" style="background-color: rgba(0, 200, 83, 0.08); border-left-color: var(--success-green);">
-                <p style="color: var(--success-green); margin: 0;">✓ Model başarıyla eğitildi ve kaydedildi!</p>
-            </div>
-        `;
-    }
-
-    resultsContent.innerHTML = html;
-    results.classList.remove('hidden');
-}
 
 /**
  * Tahmin sonuçlarını ekranda gösterir
@@ -356,7 +221,6 @@ function handleImageSelection(file) {
     try {
         validateImageFile(file);
 
-        // Dosyayı state'e kaydet
         state.selectedImageFile = file;
 
         // Önizlemeyi göster
@@ -386,7 +250,6 @@ function handleImageSelection(file) {
  */
 function resetImageSelection() {
     state.selectedImageFile = null;
-    state.selectedImage = null;
 
     const uploadArea = document.getElementById('uploadArea');
     const preview = document.getElementById('imagePreview');
@@ -405,31 +268,6 @@ function resetImageSelection() {
 // =========================================================================
 // Event Listeners Setup
 // =========================================================================
-
-/**
- * Eğitim butonu event listener'ı
- */
-function setupTrainingButton() {
-    const btn = document.getElementById('trainBtn');
-    const maxResultsInput = document.getElementById('trainingMaxResults');
-
-    btn.addEventListener('click', async () => {
-        const maxResults = parseInt(maxResultsInput.value) || 5000;
-
-        showTrainingLoading();
-
-        try {
-            const result = await trainModel(maxResults);
-            displayTrainingResults(result);
-        } catch (error) {
-            showTrainingError(
-                `Eğitim başarısız oldu: ${error.message || 'Bilinmeyen hata'}`
-            );
-        } finally {
-            hideTrainingLoading();
-        }
-    });
-}
 
 /**
  * Tahmin butonu event listener'ı
@@ -505,16 +343,6 @@ function setupImageUploadArea() {
  * Sonuç kapatma butonları
  */
 function setupCloseButtons() {
-    // Eğitim sonuçlarını kapat
-    document.getElementById('closeTrainingResults').addEventListener('click', () => {
-        document.getElementById('trainingResults').classList.add('hidden');
-    });
-
-    // Eğitim hatasını kapat
-    document.getElementById('closeTrainingError').addEventListener('click', () => {
-        document.getElementById('trainingError').classList.add('hidden');
-    });
-
     // Tahmin sonuçlarını kapat
     document.getElementById('closePredictionResults').addEventListener('click', () => {
         document.getElementById('predictionResults').classList.add('hidden');
@@ -541,7 +369,6 @@ function initializeApp() {
     setInterval(updateApiStatus, 30000); // Her 30 saniyede kontrol et
 
     // Event listener'ları kur
-    setupTrainingButton();
     setupPredictionButton();
     setupImageUploadArea();
     setupCloseButtons();
@@ -559,17 +386,14 @@ if (document.readyState === 'loading') {
 }
 
 // =========================================================================
-// Debug / Development
+// Debug Mode
 // =========================================================================
 
-// Geliştirme modunda API uç noktalarını global olarak erişilebilir hale getir
 if (typeof window !== 'undefined') {
     window.CarettaTrackDebug = {
         checkApiHealth,
-        trainModel,
         predictTurtle,
         state,
         CONFIG,
     };
-    console.log('💡 Debug modu: window.CarettaTrackDebug erişilebilir');
 }
