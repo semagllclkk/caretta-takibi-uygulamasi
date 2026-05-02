@@ -150,40 +150,54 @@ function displayPredictionResults(data) {
     const resultsContent = document.getElementById('predictionResultsContent');
     const results = document.getElementById('predictionResults');
 
+    // Confidence değeri (başarılı/başarısız her durumda)
+    const confidence = data.confidence || 0;
+    const confidencePercent = (confidence * 100).toFixed(1);
+
     // Başarısız yanıt kontrolü: success: false ise hata kartı göster
-    if (!data.success) {
-        console.warn('API hata döndü:', {
+    if (!data.success || confidence < 0.60) {
+        console.warn('Tahmin sorunu:', {
+            success: data.success,
+            confidence: confidencePercent,
             stage_reached: data.stage_reached,
             error_message: data.error_message,
-            security_report: data.security_report,
-            research_result: data.research_result,
         });
 
         let html = '<div class="prediction-error-card">';
-        html += '<div class="error-header">⚠️ İşlem Başarısız</div>';
         
-        // Aşama bilgisi
-        let stageName = data.stage_reached || 'unknown';
-        const stageMap = {
-            'validation': '🔒 Güvenlik Kontrolü',
-            'research': '🔍 Kalite Analizi',
-            'prediction': '🤖 Yapay Zeka Tahmini',
-            'complete': '✓ Tamamlandı',
-        };
+        // Güven skoru başlık
+        html += '<div class="confidence-display">';
+        html += `<p class="confidence-value">${confidencePercent}%</p>`;
+        html += '<p class="confidence-label">Düşük Güven Skoru</p>';
+        html += '</div>';
         
-        html += `<div class="error-stage">${stageMap[stageName] || stageName}</div>`;
+        html += '<div class="error-header">⚠️ İşlem Başarısız veya Düşük Güven</div>';
         
-        // Hata mesajı
-        if (data.error_message) {
-            html += `<div class="error-message">${data.error_message}</div>`;
+        // Aşama bilgisi (başarısız ise)
+        if (!data.success) {
+            let stageName = data.stage_reached || 'unknown';
+            const stageMap = {
+                'validation': '🔒 Güvenlik Kontrolü',
+                'research': '🔍 Kalite Analizi',
+                'prediction': '🤖 Yapay Zeka Tahmini',
+                'complete': '✓ Tamamlandı',
+            };
+            html += `<div class="error-stage">${stageMap[stageName] || stageName}</div>`;
         }
+        
+        // Açıklayıcı mesaj
+        let explanation = data.error_message || 'Model bu fotoğrafta yeterince emin değildir.';
+        if (confidence < 0.60 && !data.error_message) {
+            explanation = `Model %${confidencePercent} güven oranıyla tahmin yapmıştır. Bu çok düşük bir orandır. Lütfen daha iyi kalitede bir fotoğraf deneyin.`;
+        }
+        html += `<div class="error-message">${explanation}</div>`;
         
         // Güvenlik hatasının detayları
         if (data.security_report && data.security_report.results && data.security_report.results.length > 0) {
             const failedValidators = data.security_report.results.filter(r => !r.passed);
             if (failedValidators.length > 0) {
                 html += '<div class="error-details">';
-                html += '<strong>Detaylar:</strong>';
+                html += '<strong>🔒 Kontrol Hataları:</strong>';
                 failedValidators.forEach(validator => {
                     html += `<p>• ${validator.validator_name}: ${validator.reason}</p>`;
                 });
@@ -194,7 +208,7 @@ function displayPredictionResults(data) {
         // Kalite hatasının detayları
         if (data.research_result && data.research_result.issues && data.research_result.issues.length > 0) {
             html += '<div class="error-details">';
-            html += '<strong>Kalite Sorunları:</strong>';
+            html += '<strong>📊 Kalite Sorunları:</strong>';
             data.research_result.issues.forEach(issue => {
                 html += `<p>• ${issue}</p>`;
             });
@@ -210,6 +224,12 @@ function displayPredictionResults(data) {
 
     // Başarılı yanıt: normal sonuç göster
     let html = '<div class="prediction-result">';
+    
+    // Güven skoru başında göster
+    html += '<div class="confidence-display">';
+    html += `<p class="confidence-value">${confidencePercent}%</p>`;
+    html += '<p class="confidence-label">Yüksek Güven Skoru</p>';
+    html += '</div>';
 
     // Bireyin durumu (yeni veya tanınan)
     const isNew = data.is_new_turtle;
@@ -222,20 +242,6 @@ function displayPredictionResults(data) {
     if (!isNew && data.turtle_id) {
         html += `<div class="turtle-id">${data.turtle_id}</div>`;
     }
-
-    // Güven skoru
-    const confidence = data.confidence || 0;
-    const confidencePercent = (confidence * 100).toFixed(1);
-
-    html += `
-        <div>
-            <div class="confidence-text">${confidencePercent}%</div>
-            <div class="confidence-bar">
-                <div class="confidence-fill" style="width: ${confidence * 100}%"></div>
-            </div>
-            <div class="confidence-label">Tahmin Güven Skoru</div>
-        </div>
-    `;
 
     // Ek bilgiler
     html += `
@@ -413,6 +419,19 @@ function setupCloseButtons() {
     });
 }
 
+/**
+ * Fotoğraf ipuçları accordion'u
+ */
+function setupTipsToggle() {
+    const tipsToggle = document.getElementById('tipsToggle');
+    const tipsContent = document.getElementById('tipsContent');
+
+    tipsToggle.addEventListener('click', () => {
+        tipsToggle.classList.toggle('active');
+        tipsContent.classList.toggle('active');
+    });
+}
+
 // =========================================================================
 // Initialization
 // =========================================================================
@@ -431,6 +450,7 @@ function initializeApp() {
     setupPredictionButton();
     setupImageUploadArea();
     setupCloseButtons();
+    setupTipsToggle();
 
     console.log('✓ Uygulama hazır!');
 }
