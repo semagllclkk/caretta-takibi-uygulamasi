@@ -45,10 +45,9 @@ _MEAN = (0.485, 0.456, 0.406)   # ImageNet normalize
 _STD  = (0.229, 0.224, 0.225)
 
 _TRAIN_TRANSFORM = transforms.Compose([
-    transforms.Resize((_IMG_SIZE + 32, _IMG_SIZE + 32)),
-    transforms.RandomCrop(_IMG_SIZE),
-    transforms.RandomHorizontalFlip(),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.1),
+    transforms.Resize((_IMG_SIZE, _IMG_SIZE)),
+    transforms.RandomHorizontalFlip(p=0.3),
+    transforms.RandomRotation(degrees=10),
     transforms.ToTensor(),
     transforms.Normalize(_MEAN, _STD),
 ])
@@ -101,9 +100,9 @@ class ResNetTurtleModel(ITurtleRecognizer):
         self,
         images_root: str | Path = "data/turtles-data/data/images",
         checkpoint_path: str | Path = "ml_engine/checkpoints/resnet_turtle.pth",
-        epochs: int = 10,
-        batch_size: int = 32,
-        learning_rate: float = 1e-3,
+        epochs: int = 5,
+        batch_size: int = 64,
+        learning_rate: float = 2e-3,
         device: str | None = None,
     ) -> None:
         self._images_root    = Path(images_root)
@@ -178,8 +177,8 @@ class ResNetTurtleModel(ITurtleRecognizer):
         model.to(self._device)
 
         # 3. Optimizasyon — yalnızca fc katmanı
-        optimizer = optim.Adam(model.fc.parameters(), lr=self._lr)
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
+        optimizer = optim.Adam(model.fc.parameters(), lr=self._lr, weight_decay=1e-4)
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self._epochs)
         criterion = nn.CrossEntropyLoss()
 
         # 4. Eğitim döngüsü

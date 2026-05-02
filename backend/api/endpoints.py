@@ -36,12 +36,14 @@ class TrainRequest(BaseModel):
     """POST /train isteği."""
     data_dir: str | None = None
     max_results: int = 5000
+    epochs: int = 3
 
     class Config:
         json_schema_extra = {
             "example": {
                 "data_dir": "data/turtles-data/data/images",
                 "max_results": 5000,
+                "epochs": 3,
             }
         }
 
@@ -61,7 +63,7 @@ class TrainResponse(BaseModel):
                 "success": True,
                 "records_collected": 1500,
                 "records_accepted": 1200,
-                "epochs_trained": 10,
+                "epochs_trained": 3,
                 "final_loss": 0.1234,
                 "error": "",
             }
@@ -182,6 +184,7 @@ async def train_model(request: TrainRequest) -> TrainResponse:
         result = service.train_system(
             data_dir=request.data_dir,
             max_results=request.max_results,
+            epochs=request.epochs,
         )
 
         logger.info(

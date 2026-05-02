@@ -9,6 +9,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,6 +24,23 @@ app = FastAPI(
     title="Caretta Track API",
     description="Caretta Caretta kaplumbağa yüz tanıma sistemi",
     version="0.1.0",
+)
+
+# ---------------------------------------------------------------------------
+# CORS Middleware (Frontend'in API'ye erişebilmesi için)
+# ---------------------------------------------------------------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:8080",      # Frontend dev sunucusu
+        "http://127.0.0.1:8080",
+        "http://localhost:3000",      # Alternative port
+        "http://127.0.0.1:3000",
+        "*",                          # Production: specific origins
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 # ---------------------------------------------------------------------------

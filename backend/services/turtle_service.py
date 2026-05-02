@@ -178,6 +178,7 @@ class TurtleService:
         self,
         data_dir: str | None = None,
         max_results: int = 5000,
+        epochs: int = 3,
     ) -> TrainingSystemResult:
         """
         Yerel veri setinden veri toplar, filtreler ve modeli egitir.
