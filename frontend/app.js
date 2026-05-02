@@ -144,12 +144,71 @@ function showPredictionError(errorMessage) {
 // =========================================================================
 
 /**
- * Tahmin sonuçlarını ekranda gösterir
+ * Tahmin sonuçlarını ekranda gösterir (başarılı veya başarısız)
  */
 function displayPredictionResults(data) {
     const resultsContent = document.getElementById('predictionResultsContent');
     const results = document.getElementById('predictionResults');
 
+    // Başarısız yanıt kontrolü: success: false ise hata kartı göster
+    if (!data.success) {
+        console.warn('API hata döndü:', {
+            stage_reached: data.stage_reached,
+            error_message: data.error_message,
+            security_report: data.security_report,
+            research_result: data.research_result,
+        });
+
+        let html = '<div class="prediction-error-card">';
+        html += '<div class="error-header">⚠️ İşlem Başarısız</div>';
+        
+        // Aşama bilgisi
+        let stageName = data.stage_reached || 'unknown';
+        const stageMap = {
+            'validation': '🔒 Güvenlik Kontrolü',
+            'research': '🔍 Kalite Analizi',
+            'prediction': '🤖 Yapay Zeka Tahmini',
+            'complete': '✓ Tamamlandı',
+        };
+        
+        html += `<div class="error-stage">${stageMap[stageName] || stageName}</div>`;
+        
+        // Hata mesajı
+        if (data.error_message) {
+            html += `<div class="error-message">${data.error_message}</div>`;
+        }
+        
+        // Güvenlik hatasının detayları
+        if (data.security_report && data.security_report.results && data.security_report.results.length > 0) {
+            const failedValidators = data.security_report.results.filter(r => !r.passed);
+            if (failedValidators.length > 0) {
+                html += '<div class="error-details">';
+                html += '<strong>Detaylar:</strong>';
+                failedValidators.forEach(validator => {
+                    html += `<p>• ${validator.validator_name}: ${validator.reason}</p>`;
+                });
+                html += '</div>';
+            }
+        }
+        
+        // Kalite hatasının detayları
+        if (data.research_result && data.research_result.issues && data.research_result.issues.length > 0) {
+            html += '<div class="error-details">';
+            html += '<strong>Kalite Sorunları:</strong>';
+            data.research_result.issues.forEach(issue => {
+                html += `<p>• ${issue}</p>`;
+            });
+            html += '</div>';
+        }
+        
+        html += '</div>';
+
+        resultsContent.innerHTML = html;
+        results.classList.remove('hidden');
+        return;
+    }
+
+    // Başarılı yanıt: normal sonuç göster
     let html = '<div class="prediction-result">';
 
     // Bireyin durumu (yeni veya tanınan)

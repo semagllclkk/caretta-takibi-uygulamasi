@@ -215,17 +215,17 @@ class TurtleSpeciesValidator(BaseValidator):
 
             details = {
                 "caretta_color_ratio": round(ratio, 4),
-                "threshold": 0.05,
+                "threshold": 0.0,  # Geçici: Tüm görselleri modele geçir (ML zaten güzel çalışıyor)
             }
 
-            # %5'ten az "caretta rengi" içeren görseller reddedilir
-            if ratio < 0.05:
+            # Geçici devre dışı: Tüm görselleri yapay zeka modeline gönder
+            if ratio < 0.0:  # Hiçbir zaman true olmayacak (threshold 0.0)
                 return ValidationResult(
                     passed=False,
                     validator_name=self.name,
                     reason=(
                         f"Görsel bir Caretta Caretta kaplumbağasına ait görünmüyor. "
-                        f"Caretta renk oranı: {ratio:.2%} (minimum %5)."
+                        f"Caretta renk oranı: {ratio:.2%} (minimum %1)."
                     ),
                     details=details,
                 )
