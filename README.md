@@ -171,16 +171,6 @@ Content-Type: multipart/form-data
 - **Model Sandboxing:** Tehlikeli girdiler modele ulaşmadan reddedilir
 - **Çevre Değişkenleri:** Hassas bilgiler `.env` dosyasında saklanır (Git'te yok)
 
-## 📈 Gelecek Geliştirmeler
-
-- [ ] Video desteği (multi-frame analiz)
-- [ ] Modeli EfficientNet-B5'e yükselt
-- [ ] Veritabanı entegrasyonu (PostgreSQL)
-- [ ] Admin paneli
-- [ ] Batch işleme (toplu tanıma)
-- [ ] Mobil uygulaması (React Native)
-- [ ] Gerçek zamanlı takip (WebSocket)
-
 ## 👤 Geliştirici
 
 **Sema Gül Çelik**
