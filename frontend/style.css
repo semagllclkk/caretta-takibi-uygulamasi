@@ -171,22 +171,34 @@ p {
 .container {
     flex: 1;
     width: 100%;
-    max-width: 600px;
+    max-width: 1400px;
     margin: var(--spacing-xl) auto;
     padding: 0 var(--spacing-md);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 60vh;
 }
 
-.content-grid {
-    display: none;
+/* =========================================================================
+   Dashboard Two-Column Layout (DÜZELTİLDİ)
+   ========================================================================= */
+
+.dashboard-container {
+    display: flex;
+    flex-direction: row; /* Kartları kesin olarak yan yana dizer */
+    justify-content: center; /* Ekranın ortasına hizalar */
+    gap: 2rem;
+    align-items: flex-start; /* Biri uzadığında diğerinin sünmesini engeller */
+    width: 100%;
+    margin: 0 auto;
 }
 
-.prediction-card {
+.input-panel,
+.results-panel {
+    flex: 1;
     width: 100%;
-    max-width: 480px;
+    max-width: 420px; /* Kartları çok daha kompakt ve zarif yapar */
 }
 
 /* =========================================================================
@@ -391,6 +403,7 @@ input[type="email"]:focus {
     display: flex;
     gap: var(--spacing-md);
     align-items: flex-start;
+    animation: slideIn 0.3s ease-out;
 }
 
 .error-alert.hidden {
@@ -472,6 +485,13 @@ input[type="email"]:focus {
     overflow: hidden;
     margin-bottom: var(--spacing-lg);
     animation: fadeInDown 0.3s ease-out;
+   
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .image-preview.hidden {
@@ -492,8 +512,8 @@ input[type="email"]:focus {
 #previewImage {
     width: 100%;
     height: auto;
-    max-height: 400px;
-    object-fit: cover;
+    max-height: 200px; /* Eskiden 400px'di, yarı yarıya küçülttük */
+    object-fit: contain; /* Fotoğrafın kırpılmadan tam sığmasını sağlar */
     display: block;
     border-radius: var(--radius-lg);
 }
@@ -575,12 +595,19 @@ input[type="email"]:focus {
    ========================================================================= */
 
 .results-area {
-    background-color: rgba(0, 200, 83, 0.05);
-    border: 1px solid rgba(0, 200, 83, 0.2);
+    background-color: var(--white); /* Garip turkuaz rengi kaldırdık, beyaz yaptık */
+    border: none;
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md); /* Diğer kartla aynı gölgeyi verdik */
     overflow: hidden;
     margin-bottom: var(--spacing-lg);
     animation: slideIn 0.3s ease-out;
+    transition: all var(--transition-normal);
+}
+
+.results-area:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
 }
 
 .results-area.hidden {
@@ -599,9 +626,10 @@ input[type="email"]:focus {
 }
 
 .result-header {
-    background: linear-gradient(135deg, rgba(0, 200, 83, 0.1) 0%, rgba(0, 168, 232, 0.1) 100%);
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid rgba(0, 200, 83, 0.2);
+    /* Sol kartın başlığıyla birebir aynı şık mavi degrade */
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.08) 0%, rgba(0, 168, 232, 0.08) 100%);
+    padding: var(--spacing-lg);
+    border-bottom: 2px solid var(--light-blue);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -609,7 +637,8 @@ input[type="email"]:focus {
 
 .result-header h3 {
     margin: 0;
-    color: var(--success-green);
+    color: var(--text-dark); /* Yeşil yazıyı iptal ettik, koyu şık renk yaptık */
+    font-size: 1.5rem;
 }
 
 .results-content {
@@ -943,6 +972,17 @@ input[type="email"]:focus {
 
     .container {
         margin: var(--spacing-lg) auto;
+    }
+
+    .dashboard-container {
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .input-panel,
+    .results-panel {
+        max-width: 100%;
+        width: 100%;
     }
 
     .card {
