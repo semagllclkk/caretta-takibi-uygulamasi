@@ -44,11 +44,11 @@ Sistem sıfırdan eğitilmek yerine, **ResNet-18** kullanılarak Transfer Learni
 ### Başarılı Tanıma (Tanınan Birey)
 ![Başarılı Tanıma - Tanınan Birey](assets/t110.png)
 
-### Başarılı Tanıma (Yeni Birey)
-![Başarılı Tanıma - Yeni Birey](assets/t547.png)
+### Başarılı Tanıma (Tanınan Birey)
+![Başarılı Tanıma - Tanınan Birey](assets/t547.png)
 
-### Düşük Güven / Hata Durumu
-![Düşük Güven Skoru](assets/t009.png)
+### Başarılı Tanıma (Tanınan Birey)
+![Başarılı Tanıma - Tanınan Birey](assets/t009.png)
 
 ## 📸 Doğru Tanıma İçin İpuçları
 
